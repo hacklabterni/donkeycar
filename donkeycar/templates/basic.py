@@ -135,6 +135,20 @@ def drive(cfg, model_path=None, model_type=None):
     # Drive train setup
     if cfg.DONKEY_GYM or cfg.DRIVE_TRAIN_TYPE == "MOCK":
         pass
+
+    elif cfg.DRIVE_TRAIN_TYPE == "PWM_TWO_WHEEL":
+        from donkeycar.parts.actuator import TwoWheelSteeringThrottle, Diff_PCA9685
+
+        left_motor = Diff_PCA9685(cfg.LEFT_FWD_CHANNEL, cfg.LEFT_BWD_CHANNEL, cfg.LEFT_SPD_CHANNEL)
+        right_motor = Diff_PCA9685(cfg.RIGHT_FWD_CHANNEL, cfg.RIGHT_BWD_CHANNEL, cfg.RIGHT_SPD_CHANNEL)
+        two_wheel_control = TwoWheelSteeringThrottle()
+        car.add(two_wheel_control,
+            inputs=['throttle', 'angle'],
+            outputs=['left_motor_speed', 'right_motor_speed'])
+
+        car.add(left_motor, inputs=['left_motor_speed'])
+        car.add(right_motor, inputs=['right_motor_speed'])
+
     else:
         steering_controller = PCA9685(cfg.STEERING_CHANNEL, cfg.PCA9685_I2C_ADDR,
                                     busnum=cfg.PCA9685_I2C_BUSNUM)
