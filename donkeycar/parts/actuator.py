@@ -805,3 +805,53 @@ class ArdPWMThrottle:
         # stop vehicle
         self.run(0)
         self.running = False
+
+class Diff_PCA9685:
+    '''
+    Motor controlled with an L298N hbridge from the GPIO pins of a PC9685
+    '''
+    def __init__(self, channel_forward, channel_backward, channel_speed,
+                 address=0x60, freq=60, busnum=None, init_delay=0.1):
+        self.channel_forward = channel_forward
+        self.channel_backward = channel_backward
+        self.channel_speed = channel_speed
+
+        self.default_freq = 60
+        self.pwm_scale = freq / self.default_freq
+
+        import Adafruit_PCA9685
+        # Initialise the PCA9685 using the default address (0x40).
+        if busnum is not None:
+            from Adafruit_GPIO import I2C
+            #replace the get_bus function with our own
+            def get_bus():
+                return busnum
+            I2C.get_default_bus = get_bus
+        self.pwm = Adafruit_PCA9685.PCA9685(address=address)
+        self.pwm.set_pwm_freq(freq)
+        time.sleep(init_delay) # "Tamiya TBLE-02" makes a little leap otherwise
+
+    def run(self, speed):
+        '''
+        Update the speed of the motor where 1 is full forward and
+        -1 is full backwards.
+        '''
+        if speed > 1 or speed < -1:
+            raise ValueError( "Speed must be between 1(forward) and -1(reverse)")
+
+        self.speed = speed
+        self.throttle = int(dk.utils.map_range(abs(speed), 0, 1, 0, 4095))
+
+        if self.speed > 0:
+            self.pwm.set_pwm(self.channel_speed, 0, self.throttle)
+            self.pwm.set_pwm(self.channel_forward, 0, 4095)
+            self.pwm.set_pwm(self.channel_backward, 0, 0)
+        elif self.speed < 0:
+            self.pwm.set_pwm(self.channel_speed, 0, self.throttle)
+            self.pwm.set_pwm(self.channel_forward, 0, 0)
+            self.pwm.set_pwm(self.channel_backward, 0, 4095)
+        else:
+            self.pwm.set_pwm(self.channel_speed, 0, 0)
+            self.pwm.set_pwm(self.channel_forward, 0, 0)
+            self.pwm.set_pwm(self.channel_backward, 0, 0)
+

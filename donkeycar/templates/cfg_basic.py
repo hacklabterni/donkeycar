@@ -23,7 +23,7 @@ MODELS_PATH = os.path.join(CAR_PATH, 'models')
 #VEHICLE
 DRIVE_LOOP_HZ = 20
 MAX_LOOPS = 100000
-DRIVE_TRAIN_TYPE = "SERVO_ESC" # SERVO_ESC|DC_STEER_THROTTLE|DC_TWO_WHEEL|SERVO_HBRIDGE_PWM|PIGPIO_PWM|MM1|MOCK
+DRIVE_TRAIN_TYPE = "PWM_TWO_WHEEL" # SERVO_ESC|DC_STEER_THROTTLE|DC_TWO_WHEEL|SERVO_HBRIDGE_PWM|PIGPIO_PWM|MM1|MOCK|PWM_TWO_WHEEL
 
 #CAMERA
 CAMERA_TYPE = "PICAM"   # (PICAM|WEBCAM|CVCAM|CSIC|V4L|D435|MOCK|IMAGE_LIST)
@@ -50,6 +50,9 @@ THROTTLE_STOPPED_PWM = 370
 THROTTLE_REVERSE_PWM = 220
 
 #TRAINING
+# The default AI framework to use. Choose from (tensorflow|pytorch)
+DEFAULT_AI_FRAMEWORK='tensorflow'
+
 DEFAULT_MODEL_TYPE = 'linear' #(linear|categorical|rnn|imu|behavior|3d|localizer|latent)
 BATCH_SIZE = 128
 TRAIN_TEST_SPLIT = 0.8
@@ -106,6 +109,8 @@ JOYSTICK_DEVICE_FILE = "/dev/input/js0" # this is the unix file use to access th
 WEB_CONTROL_PORT = int(os.getenv("WEB_CONTROL_PORT", 8887))  # which port to listen on when making a web controller
 WEB_INIT_MODE = "user"              # which control mode to start in. one of user|local_angle|local. Setting local will start in ai mode.
 
+#DRIVING
+AI_THROTTLE_MULT = 1.0              # this multiplier will scale every throttle value for all output from NN models
 
 #DonkeyGym
 #Only on Ubuntu linux, you can use the simulator as a virtual donkey and
